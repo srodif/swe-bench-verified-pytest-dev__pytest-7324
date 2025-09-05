@@ -128,8 +128,6 @@ def test_syntax_errors(expr: str, column: int, message: str) -> None:
         "not[and]or",
         "1234+5678",
         "123.232",
-        "True",
-        "False",
         "if",
         "else",
         "while",
@@ -137,6 +135,41 @@ def test_syntax_errors(expr: str, column: int, message: str) -> None:
 )
 def test_valid_idents(ident: str) -> None:
     assert evaluate(ident, {ident: True}.__getitem__)
+
+
+@pytest.mark.parametrize(
+    ("constant", "expected"),
+    (
+        ("True", True),
+        ("False", False),
+        ("None", None),
+    ),
+)
+def test_constants(constant: str, expected: bool) -> None:
+    """Test that True/False/None are treated as Python constants, not identifiers."""
+    # The matcher function should not be called for these constants
+    result = evaluate(constant, lambda ident: not expected)
+    assert result is expected
+
+
+def test_constants_in_expressions() -> None:
+    """Test that constants work correctly in complex expressions."""
+    # Test boolean operations with constants
+    assert evaluate("True and False", lambda x: True) is False
+    assert evaluate("True or False", lambda x: False) is True
+    assert evaluate("not True", lambda x: True) is False
+    assert evaluate("not False", lambda x: False) is True
+    
+    # Test constants mixed with identifiers
+    matcher = {"test": True, "other": False}.__getitem__
+    assert evaluate("True and test", matcher) is True
+    assert evaluate("False or test", matcher) is True
+    assert evaluate("True and other", matcher) is False
+    assert evaluate("False or other", matcher) is False
+    
+    # Test None behavior
+    assert evaluate("None or True", lambda x: False) is True
+    assert evaluate("True and None", lambda x: False) is None
 
 
 @pytest.mark.parametrize(

@@ -129,7 +129,7 @@ class Scanner:
 
 def expression(s: Scanner) -> ast.Expression:
     if s.accept(TokenType.EOF):
-        ret = ast.NameConstant(False)  # type: ast.expr
+        ret = ast.Constant(False)  #type: ast.expr
     else:
         ret = expr(s)
         s.accept(TokenType.EOF, reject=True)
@@ -161,7 +161,14 @@ def not_expr(s: Scanner) -> ast.expr:
         return ret
     ident = s.accept(TokenType.IDENT)
     if ident:
-        return ast.Name(ident.value, ast.Load())
+        if ident.value == "True":
+            return ast.Constant(True)
+        elif ident.value == "False":
+            return ast.Constant(False)
+        elif ident.value == "None":
+            return ast.Constant(None)
+        else:
+            return ast.Name(ident.value, ast.Load())
     s.reject((TokenType.NOT, TokenType.LPAREN, TokenType.IDENT))
 
 
