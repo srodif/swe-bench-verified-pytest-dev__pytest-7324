@@ -129,7 +129,7 @@ class Scanner:
 
 def expression(s: Scanner) -> ast.Expression:
     if s.accept(TokenType.EOF):
-        ret = ast.Constant(False)  # type: ast.expr
+        ret = ast.Constant(False)  #type: ast.expr
     else:
         ret = expr(s)
         s.accept(TokenType.EOF, reject=True)
